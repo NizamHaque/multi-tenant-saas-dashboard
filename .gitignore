@@ -1,0 +1,54 @@
+# ==========================================
+# FRONTEND
+# ==========================================
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# Frontend environment files
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+frontend/.env.*.local
+
+
+# ==========================================
+# BACKEND
+# ==========================================
+backend/target/
+
+# Backend environment files
+backend/.env
+backend/.env.local
+
+# ==========================================
+# OLD GIT REPOSITORY BACKUPS
+# ==========================================
+frontend/.git-old-frontend/
+backend/.git-old-backend/
+
+
+# ==========================================
+# IDE
+# ==========================================
+.idea/
+.vscode/
+*.iml
+
+
+# ==========================================
+# OPERATING SYSTEM
+# ==========================================
+.DS_Store
+Thumbs.db
+
+
+# ==========================================
+# LOGS
+# ==========================================
+*.log
+
+# Backend configuration containing secrets
+backend/src/main/resources/application.properties
+backend/src/main/resources/application-*.properties
