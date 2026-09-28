@@ -8,8 +8,10 @@ import com.saas.Dashboard.repository.UserRepository;
 import com.saas.Dashboard.security.TenantContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,6 +42,7 @@ public class MemberProfileService {
     }
 
     public MemberProfile updateMyProfile(ProfileUpdateRequest request) {
+        checkNotDemo("updating profile");
         MemberProfile profile = getMyProfile();
 
         profile.setFullName(request.getFullName());
@@ -55,6 +58,7 @@ public class MemberProfileService {
     }
 
     public MemberProfile uploadDocument(MultipartFile file, String documentType) {
+        checkNotDemo("uploading documents");
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("Please select a file to upload");
         }
@@ -82,6 +86,7 @@ public class MemberProfileService {
     }
 
     public MemberProfile deleteDocument(String documentId) {
+        checkNotDemo("deleting documents");
         MemberProfile profile = getMyProfile();
         MemberProfile.ProfileDocument doc = findDocument(profile, documentId);
 
@@ -93,7 +98,7 @@ public class MemberProfileService {
     }
 
     public List<MemberProfile> getAllProfilesForAdmin() {
-        requireOrgAdmin();
+        requireOrgAdminOrDemo();
         String tenantId = TenantContext.getTenantId();
 
         List<User> users = userRepository.findAllByTenantId(tenantId);
@@ -115,7 +120,7 @@ public class MemberProfileService {
     }
 
     public MemberProfile getProfileForAdmin(String userEmail) {
-        requireOrgAdmin();
+        requireOrgAdminOrDemo();
         return profileRepository
             .findByTenantIdAndUserEmail(TenantContext.getTenantId(), userEmail)
             .orElse(emptyProfile(TenantContext.getTenantId(), userEmail));
@@ -127,7 +132,7 @@ public class MemberProfileService {
         String role = TenantContext.getRole();
 
         MemberProfile profile;
-        if ("ORG_ADMIN".equals(role)) {
+        if ("ORG_ADMIN".equals(role) || "DEMO".equals(role)) {
             profile = profileRepository.findAllByTenantId(tenantId).stream()
                 .filter(p -> p.getDocuments().stream()
                     .anyMatch(d -> d.getId().equals(documentId)))
@@ -149,7 +154,7 @@ public class MemberProfileService {
         String role = TenantContext.getRole();
 
         MemberProfile profile;
-        if ("ORG_ADMIN".equals(role)) {
+        if ("ORG_ADMIN".equals(role) || "DEMO".equals(role)) {
             profile = profileRepository.findAllByTenantId(tenantId).stream()
                 .filter(p -> p.getDocuments().stream()
                     .anyMatch(d -> d.getId().equals(documentId)))
@@ -170,7 +175,7 @@ public class MemberProfileService {
         String email = TenantContext.getEmail();
 
         MemberProfile profile;
-        if ("ORG_ADMIN".equals(role)) {
+        if ("ORG_ADMIN".equals(role) || "DEMO".equals(role)) {
             profile = profileRepository.findAllByTenantId(tenantId).stream()
                 .filter(p -> p.getDocuments().stream()
                     .anyMatch(d -> d.getId().equals(documentId)))
@@ -192,9 +197,16 @@ public class MemberProfileService {
             .orElseThrow(() -> new RuntimeException("Document not found"));
     }
 
-    private void requireOrgAdmin() {
-        if (!"ORG_ADMIN".equals(TenantContext.getRole())) {
-            throw new RuntimeException("Access denied. Organisation admin only.");
+    private void requireOrgAdminOrDemo() {
+        String role = TenantContext.getRole();
+        if (!"ORG_ADMIN".equals(role) && !"DEMO".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied. Organisation admin or Demo access required.");
+        }
+    }
+
+    private void checkNotDemo(String actionName) {
+        if ("DEMO".equals(TenantContext.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Demo account is read-only. " + actionName + " is disabled.");
         }
     }
 }

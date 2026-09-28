@@ -42,20 +42,34 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 StompHeaderAccessor accessor =
                     MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
-                if (accessor != null && StompCommand.CONNECT.equals(accessor.getCommand())) {
+                if (accessor != null) {
                     String auth = accessor.getFirstNativeHeader("Authorization");
                     if (auth != null && auth.startsWith("Bearer ")) {
                         String token = auth.substring(7);
                         if (jwtUtil.isTokenValid(token)) {
-                            TenantContext.setTenantId(jwtUtil.extractTenantId(token));
-                            TenantContext.setRole(jwtUtil.extractRole(token));
-                            TenantContext.setEmail(jwtUtil.extractEmail(token));
-                        }
-                    }
-                }
+                            String tenantId = jwtUtil.extractTenantId(token);
+                            String role = jwtUtil.extractRole(token);
+                            String email = jwtUtil.extractEmail(token);
 
-                if (accessor != null && StompCommand.DISCONNECT.equals(accessor.getCommand())) {
-                    TenantContext.clear();
+                            if (accessor.getSessionAttributes() != null) {
+                                accessor.getSessionAttributes().put("tenantId", tenantId);
+                                accessor.getSessionAttributes().put("role", role);
+                                accessor.getSessionAttributes().put("email", email);
+                            }
+
+                            TenantContext.setTenantId(tenantId);
+                            TenantContext.setRole(role);
+                            TenantContext.setEmail(email);
+                        }
+                    } else if (accessor.getSessionAttributes() != null && accessor.getSessionAttributes().containsKey("tenantId")) {
+                        TenantContext.setTenantId((String) accessor.getSessionAttributes().get("tenantId"));
+                        TenantContext.setRole((String) accessor.getSessionAttributes().get("role"));
+                        TenantContext.setEmail((String) accessor.getSessionAttributes().get("email"));
+                    }
+
+                    if (StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+                        TenantContext.clear();
+                    }
                 }
 
                 return message;

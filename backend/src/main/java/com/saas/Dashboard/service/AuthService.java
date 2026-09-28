@@ -1,12 +1,15 @@
 package com.saas.Dashboard.service;
 
+import com.saas.Dashboard.config.DemoDataSeeder;
 import com.saas.Dashboard.dto.*;
 import com.saas.Dashboard.entity.*;
 import com.saas.Dashboard.repository.*;
 import com.saas.Dashboard.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
     private final EventLogger eventLogger;
+    private final DemoDataSeeder demoDataSeeder;
 
     public AuthResponse signup(SignupRequest request) {
         if (tenantRepository.existsByName(request.getCompanyName()))
@@ -62,6 +66,23 @@ public class AuthService {
                 user.getEmail(),
                 "USER_LOGIN",
                 user.getEmail() + " logged in"
+        );
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getTenantId(), user.getRole());
+        return new AuthResponse(token, user.getRole(), user.getTenantName(), user.getTenantId());
+    }
+
+    public AuthResponse demoLogin() {
+        demoDataSeeder.seedDemoDataIfMissing();
+
+        User user = userRepository.findByEmail(DemoDataSeeder.DEMO_USER_EMAIL)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Demo user failed to initialize"));
+
+        eventLogger.log(
+                user.getTenantId(),
+                user.getEmail(),
+                "DEMO_USER_LOGIN",
+                "Recruiter demo session initiated for " + user.getEmail()
         );
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getTenantId(), user.getRole());

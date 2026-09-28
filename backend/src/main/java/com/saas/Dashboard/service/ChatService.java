@@ -5,7 +5,9 @@ import com.saas.Dashboard.entity.ChatMessage;
 import com.saas.Dashboard.repository.ChatMessageRepository;
 import com.saas.Dashboard.security.TenantContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @Service
@@ -21,12 +23,20 @@ public class ChatService {
     }
 
     public ChatMessage saveMessage(ChatMessageRequest request) {
+        if ("DEMO".equals(TenantContext.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Demo account is read-only. Sending chat messages is disabled.");
+        }
+
         String tenantId = TenantContext.getTenantId();
+        if (tenantId == null || tenantId.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Tenant context missing or unauthenticated");
+        }
+
         String email = TenantContext.getEmail();
         String role = TenantContext.getRole();
 
         ChatMessage message = new ChatMessage();
-        message.setTenantId(tenantId != null ? tenantId : request.getTenantId());
+        message.setTenantId(tenantId);
         message.setSenderEmail(email != null ? email : request.getSenderEmail());
         message.setSenderRole(role != null ? role : request.getSenderRole());
         message.setContent(request.getContent());

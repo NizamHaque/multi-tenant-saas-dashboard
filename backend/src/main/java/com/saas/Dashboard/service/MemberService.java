@@ -7,8 +7,10 @@ import com.saas.Dashboard.repository.UserRepository;
 import com.saas.Dashboard.repository.TenantRepository;
 import com.saas.Dashboard.security.TenantContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,8 +29,12 @@ public class MemberService {
         String tenantId = TenantContext.getTenantId();
         String role = TenantContext.getRole();
 
+        if ("DEMO".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Demo account is read-only. Inviting members is disabled.");
+        }
+
         if (!"ORG_ADMIN".equals(role)) {
-            throw new RuntimeException("Only ORG_ADMIN can invite members");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only ORG_ADMIN can invite members");
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {

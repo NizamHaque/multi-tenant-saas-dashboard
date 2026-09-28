@@ -5,7 +5,9 @@ import com.saas.Dashboard.repository.AttendanceRepository;
 import com.saas.Dashboard.repository.UserRepository;
 import com.saas.Dashboard.security.TenantContext;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,6 +22,10 @@ public class AttendanceService {
     private final UserRepository userRepository;
 
     public AttendanceRecord markPresent() {
+        if ("DEMO".equals(TenantContext.getRole())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Demo account is read-only. Marking attendance is disabled.");
+        }
+
         String tenantId = TenantContext.getTenantId();
         String email = TenantContext.getEmail();
         LocalDate today = LocalDate.now();
@@ -58,8 +64,8 @@ public class AttendanceService {
         String tenantId = TenantContext.getTenantId();
         String role = TenantContext.getRole();
 
-        if (!"ORG_ADMIN".equals(role) && !"MANAGER".equals(role)) {
-            throw new RuntimeException("Access denied");
+        if (!"ORG_ADMIN".equals(role) && !"MANAGER".equals(role) && !"DEMO".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
         LocalDate today = LocalDate.now();
@@ -88,8 +94,8 @@ public class AttendanceService {
         String tenantId = TenantContext.getTenantId();
         String role = TenantContext.getRole();
 
-        if (!"ORG_ADMIN".equals(role) && !"MANAGER".equals(role)) {
-            throw new RuntimeException("Access denied");
+        if (!"ORG_ADMIN".equals(role) && !"MANAGER".equals(role) && !"DEMO".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
         return attendanceRepository.findAllByTenantId(tenantId);
@@ -99,8 +105,8 @@ public class AttendanceService {
         String tenantId = TenantContext.getTenantId();
         String role = TenantContext.getRole();
 
-        if (!"ORG_ADMIN".equals(role) && !"MANAGER".equals(role)) {
-            throw new RuntimeException("Access denied");
+        if (!"ORG_ADMIN".equals(role) && !"MANAGER".equals(role) && !"DEMO".equals(role)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
         List<AttendanceRecord> allRecords =
