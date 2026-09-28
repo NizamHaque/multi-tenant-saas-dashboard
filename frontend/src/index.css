@@ -799,6 +799,39 @@ button {
   color: var(--text-muted);
 }
 
+/* Demo Mode Badge */
+.demo-mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  background: rgba(255, 222, 66, 0.2);
+  color: #FFDE42;
+  border: 1px solid rgba(255, 222, 66, 0.4);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.button-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(27, 12, 12, 0.3);
+  border-radius: 50%;
+  border-top-color: #1B0C0C;
+  animation: buttonSpin 0.8s linear infinite;
+}
+
+@keyframes buttonSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
 /* Settings */
 .org-profile-card {
   background: var(--card);
@@ -2321,3 +2354,199 @@ button {
   }
 }
 
+/* Demo Mode Badge & Tooltip */
+.demo-mode-container {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  position: relative;
+}
+
+.demo-mode-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: rgba(255, 222, 66, 0.14);
+  color: #FFDE42;
+  border: 1px solid rgba(255, 222, 66, 0.35);
+  border-radius: 999px;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: help;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.demo-mode-badge-pill:hover {
+  background: rgba(255, 222, 66, 0.24);
+  border-color: rgba(255, 222, 66, 0.55);
+}
+
+.demo-mode-dot {
+  color: #FFDE42;
+  font-size: 0.55rem;
+  animation: demoDotPulse 2s ease-in-out infinite;
+}
+
+@keyframes demoDotPulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; filter: drop-shadow(0 0 4px #FFDE42); }
+}
+
+.demo-mode-tooltip {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(27, 12, 12, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 0.25rem 0.65rem;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+}
+
+@media (max-width: 768px) {
+  .demo-mode-tooltip {
+    display: none;
+  }
+}
+
+/* Hero SVG Illustration Animations */
+.hero-robot-bob {
+  animation: heroRobotBob 4s ease-in-out infinite;
+}
+
+.hero-robot-eyes {
+  animation: heroRobotBlink 5s ease-in-out infinite;
+  transform-origin: 100px 207px;
+}
+
+.hero-antenna-glow {
+  animation: heroAntennaPulse 2.5s ease-in-out infinite alternate;
+}
+
+.hero-hand-pulse {
+  animation: heroHandPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  transform-origin: 210px 230px;
+}
+
+.hero-dash-line {
+  stroke-dasharray: 6 6;
+  animation: heroDashMove 15s linear infinite;
+}
+
+.hero-dash-line-rev {
+  stroke-dasharray: 4 4;
+  animation: heroDashMove 12s linear infinite reverse;
+}
+
+.hero-float-badge-1 {
+  animation: heroBadgeFloat1 5s ease-in-out infinite;
+}
+
+.hero-float-badge-2 {
+  animation: heroBadgeFloat2 6s ease-in-out infinite;
+}
+
+.hero-float-badge-3 {
+  animation: heroBadgeFloat3 5.5s ease-in-out infinite;
+}
+
+.hero-status-pulse {
+  animation: heroGreenPulse 2s ease-in-out infinite;
+}
+
+.hero-chart-bars rect {
+  transform-origin: bottom;
+  animation: heroBarGrow 3.5s ease-in-out infinite alternate;
+}
+
+.bar-b1 { animation-delay: 0.1s; }
+.bar-b2 { animation-delay: 0.4s; }
+.bar-b3 { animation-delay: 0.2s; }
+.bar-b4 { animation-delay: 0.5s; }
+.bar-b5 { animation-delay: 0.3s; }
+.bar-b6 { animation-delay: 0.6s; }
+.bar-b7 { animation-delay: 0.25s; }
+
+.hero-particle {
+  animation: heroParticleDrift 8s ease-in-out infinite alternate;
+}
+.p1 { animation-delay: 0s; }
+.p2 { animation-delay: 1.5s; }
+.p3 { animation-delay: 3s; }
+.p4 { animation-delay: 4.5s; }
+.p5 { animation-delay: 2s; }
+
+@keyframes heroRobotBob {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes heroRobotBlink {
+  0%, 94%, 98%, 100% { transform: scaleY(1); }
+  96% { transform: scaleY(0.08); }
+}
+
+@keyframes heroAntennaPulse {
+  0% { fill: #FFDE42; filter: drop-shadow(0 0 2px #FFDE42); }
+  100% { fill: #FFF2A1; filter: drop-shadow(0 0 10px #FFDE42); }
+}
+
+@keyframes heroHandPulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.25); opacity: 0.2; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+@keyframes heroDashMove {
+  to { stroke-dashoffset: -120; }
+}
+
+@keyframes heroBadgeFloat1 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes heroBadgeFloat2 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(7px); }
+}
+
+@keyframes heroBadgeFloat3 {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes heroGreenPulse {
+  0%, 100% { fill: #27c93f; filter: drop-shadow(0 0 2px #27c93f); }
+  50% { fill: #48ec62; filter: drop-shadow(0 0 8px #27c93f); }
+}
+
+@keyframes heroBarGrow {
+  0% { transform: scaleY(0.92); }
+  100% { transform: scaleY(1.08); }
+}
+
+@keyframes heroParticleDrift {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(12px, -15px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-robot-bob,
+  .hero-robot-eyes,
+  .hero-antenna-glow,
+  .hero-hand-pulse,
+  .hero-dash-line,
+  .hero-dash-line-rev,
+  .hero-float-badge-1,
+  .hero-float-badge-2,
+  .hero-float-badge-3,
+  .hero-status-pulse,
+  .hero-chart-bars rect,
+  .hero-particle {
+    animation: none !important;
+  }
+}

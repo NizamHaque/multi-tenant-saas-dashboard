@@ -82,8 +82,11 @@ export function ChatProvider({ children }) {
     const token = localStorage.getItem('token')
     if (!token) return
 
+    const apiBase = api.defaults.baseURL || 'http://localhost:8080/api'
+    const wsBase = apiBase.replace(/\/api\/?$/, '/ws')
+
     const client = new Client({
-      webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
+      webSocketFactory: () => new SockJS(wsBase),
       connectHeaders: { Authorization: `Bearer ${token}` },
       reconnectDelay: 5000,
       onConnect: () => {
@@ -186,6 +189,7 @@ export function ChatProvider({ children }) {
   )
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useChat() {
   const ctx = useContext(ChatContext)
   if (!ctx) throw new Error('useChat must be used within ChatProvider')

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { handleAuthError } from '../utils/auth'
+import { handleAuthError, isDemoUser } from '../utils/auth'
 import { useChat } from '../context/ChatContext'
 
 export default function Sidebar() {
@@ -9,6 +9,7 @@ export default function Sidebar() {
   const { unreadCount } = useChat()
   const [email, setEmail] = useState('')
   const tenantName = localStorage.getItem('tenantName') || 'Your Company'
+  const isDemo = isDemoUser()
 
   useEffect(() => {
     api
@@ -29,9 +30,13 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <p className="sidebar-company">{tenantName}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.35rem' }}>
+          <p className="sidebar-company" style={{ margin: 0 }}>{tenantName}</p>
+          {isDemo && <span className="demo-mode-badge-pill" style={{ fontSize: '0.65rem', padding: '0.15rem 0.45rem' }}>DEMO MODE</span>}
+        </div>
         <p className="sidebar-email">{email || 'Loading...'}</p>
       </div>
+
 
       <nav className="sidebar-nav">
         <NavLink

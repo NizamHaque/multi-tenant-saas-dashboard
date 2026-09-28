@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios'
+import { loginAsDemo, getErrorMessage } from '../utils/auth'
 
 const authStyles = `
   @keyframes authGradientShift {
@@ -95,8 +96,49 @@ const authStyles = `
     transform: none;
     box-shadow: none;
   }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.25rem 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.8rem;
+  }
+  .auth-divider::before, .auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+  .auth-divider span {
+    padding: 0 0.75rem;
+  }
+  .auth-secondary-button {
+    width: 100%;
+    padding: 0.75rem;
+    background: rgba(255, 222, 66, 0.08);
+    color: #FFDE42;
+    border: 1px solid rgba(255, 222, 66, 0.3);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .auth-secondary-button:hover:not(:disabled) {
+    background: rgba(255, 222, 66, 0.16);
+    border-color: rgba(255, 222, 66, 0.5);
+    transform: translateY(-1px);
+  }
+  .auth-secondary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
   .auth-error { color: #ef4444; margin-bottom: 1rem; font-size: 0.9rem; }
-  .auth-link { margin-top: 1rem; text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.6); }
+  .auth-link { margin-top: 1.25rem; text-align: center; font-size: 0.9rem; color: rgba(255,255,255,0.6); }
   .auth-link a { color: #FFDE42; }
   .auth-forgot {
     display: block;
@@ -127,6 +169,18 @@ const authStyles = `
     font-weight: 500;
     text-decoration: none;
   }
+  @media (max-width: 480px) {
+    .auth-card {
+      padding: 1.75rem 1.25rem;
+    }
+    .auth-title {
+      font-size: 1.25rem;
+    }
+    .auth-back {
+      top: 1rem;
+      left: 1rem;
+    }
+  }
 `
 
 export default function Login() {
@@ -134,6 +188,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [demoLoading, setDemoLoading] = useState(false)
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -151,6 +206,18 @@ export default function Login() {
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed')
       setLoading(false)
+    }
+  }
+
+  const handleDemoLogin = async () => {
+    setError('')
+    setDemoLoading(true)
+    try {
+      await loginAsDemo()
+      navigate('/dashboard')
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to launch demo session. Please try normal login.'))
+      setDemoLoading(false)
     }
   }
 
@@ -189,7 +256,7 @@ export default function Login() {
           >
             Forgot password?
           </button>
-          <button className="auth-button" type="submit" disabled={loading}>
+          <button className="auth-button" type="submit" disabled={loading || demoLoading}>
             {loading ? (
               <>
                 <span className="button-spinner"></span>
@@ -200,6 +267,29 @@ export default function Login() {
             )}
           </button>
         </form>
+
+        <div className="auth-divider">
+          <span>or</span>
+        </div>
+
+        <button
+          type="button"
+          className="auth-secondary-button"
+          onClick={handleDemoLogin}
+          disabled={demoLoading || loading}
+        >
+          {demoLoading ? (
+            <>
+              <span className="button-spinner"></span>
+              Opening Demo...
+            </>
+          ) : (
+            <>
+              ⚡ Continue as Guest
+            </>
+          )}
+        </button>
+
         <p className="auth-link">
           New here? <Link to="/signup">Create organisation</Link>
         </p>

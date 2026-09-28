@@ -33,8 +33,8 @@ export default function Members() {
     fetchMembers()
   }, [fetchMembers])
 
-  const handleInviteSuccess = () => {
-    setSuccess('Member invited successfully')
+  const handleInviteSuccess = (msg) => {
+    setSuccess(msg || 'Member invited successfully')
     fetchMembers()
     setTimeout(() => setSuccess(''), 4000)
   }

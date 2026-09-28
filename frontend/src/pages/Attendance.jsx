@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import api from '../api/axios'
-import { handleAuthError, getErrorMessage } from '../utils/auth'
+import { handleAuthError, getErrorMessage, isDemoUser } from '../utils/auth'
 
 function StatusBadge({ status }) {
   const present = status === 'PRESENT'
@@ -59,6 +59,17 @@ function MemberView() {
     setError('')
     setSuccess('')
     setMarking(true)
+
+    if (isDemoUser()) {
+      setTimeout(() => {
+        setMarking(false)
+        setStatus({ marked: true, status: 'PRESENT' })
+        setSuccess('Demo Mode: Attendance marked present locally!')
+        setTimeout(() => setSuccess(''), 4000)
+      }, 300)
+      return
+    }
+
     try {
       await api.post('/attendance/mark')
       setSuccess('Attendance marked successfully!')

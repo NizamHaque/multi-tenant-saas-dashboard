@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { getErrorMessage, handleAuthError } from '../utils/auth'
+import { getErrorMessage, handleAuthError, isDemoUser } from '../utils/auth'
 
 export default function InviteModal({ onClose, onSuccess }) {
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '', role: 'VIEWER' })
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const isDemo = isDemoUser()
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -17,6 +18,16 @@ export default function InviteModal({ onClose, onSuccess }) {
     e.preventDefault()
     setError('')
     setSubmitting(true)
+
+    if (isDemo) {
+      setTimeout(() => {
+        setSubmitting(false)
+        onSuccess(`Demo Mode: Simulated member invite for ${form.email}!`)
+        onClose()
+      }, 400)
+      return
+    }
+
     try {
       await api.post('/members/invite', form)
       onSuccess()
@@ -34,6 +45,11 @@ export default function InviteModal({ onClose, onSuccess }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <h2 className="modal-title">Invite Member</h2>
+        {isDemo && (
+          <div className="alert alert-info" style={{ fontSize: '0.8rem', background: 'rgba(255, 222, 66, 0.15)', color: '#FFDE42', border: '1px solid rgba(255, 222, 66, 0.3)', marginBottom: '1rem' }}>
+            ⚡ Demo Mode: Inviting members simulates a successful workflow without altering persistent database records.
+          </div>
+        )}
         {error && <div className="alert alert-error">{error}</div>}
         <form className="modal-form" onSubmit={handleSubmit}>
           <label htmlFor="invite-email">Email</label>

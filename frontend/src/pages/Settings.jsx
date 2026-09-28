@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { handleAuthError, getErrorMessage } from '../utils/auth'
+import { handleAuthError, getErrorMessage, isDemoUser } from '../utils/auth'
 import RoleBadge from '../components/RoleBadge'
 
 export default function Settings() {
@@ -10,6 +10,7 @@ export default function Settings() {
   const [memberCount, setMemberCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const isDemo = isDemoUser()
 
   useEffect(() => {
     Promise.all([api.get('/tenant/me'), api.get('/members')])
@@ -52,6 +53,12 @@ export default function Settings() {
         <h1 className="page-title">Settings</h1>
         <p className="page-subtitle">Your organisation and account details</p>
       </header>
+
+      {isDemo && (
+        <div className="alert alert-info" style={{ background: 'rgba(255, 222, 66, 0.12)', color: '#FFDE42', border: '1px solid rgba(255, 222, 66, 0.3)', marginBottom: '1.5rem' }}>
+          ℹ️ Demo Mode: Settings and organisation details are read-only to preserve the shared demo environment.
+        </div>
+      )}
 
       <div className="org-profile-card">
         <div className="org-profile-header">

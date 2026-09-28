@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api/axios'
-import { handleAuthError, getErrorMessage } from '../utils/auth'
+import { handleAuthError, getErrorMessage, isDemoUser } from '../utils/auth'
 import RoleBadge from '../components/RoleBadge'
 
 const DOC_TYPES = [
@@ -30,8 +30,9 @@ function formatFileSize(bytes) {
 
 async function downloadDocument(docId, fileName) {
   const token = localStorage.getItem('token')
+  const baseUrl = api.defaults.baseURL || 'http://localhost:8080/api'
   const res = await fetch(
-    `http://localhost:8080/api/profile/documents/${docId}/download`,
+    `${baseUrl}/profile/documents/${docId}/download`,
     { headers: { Authorization: `Bearer ${token}` } }
   )
   if (!res.ok) throw new Error('Download failed')
@@ -97,8 +98,9 @@ function MemberProfileForm() {
   const [success, setSuccess] = useState('')
   const [docType, setDocType] = useState('RESUME')
   const fileRef = useRef(null)
+  const isDemo = isDemoUser()
 
-  const loadProfile = () => {
+  const loadProfile = useCallback(() => {
     api
       .get('/profile/me')
       .then((res) => {
@@ -119,11 +121,11 @@ function MemberProfileForm() {
         }
       })
       .finally(() => setLoading(false))
-  }
+  }, [navigate])
 
   useEffect(() => {
     loadProfile()
-  }, [navigate])
+  }, [loadProfile])
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -134,6 +136,16 @@ function MemberProfileForm() {
     setSaving(true)
     setError('')
     setSuccess('')
+
+    if (isDemo) {
+      setTimeout(() => {
+        setSaving(false)
+        setSuccess('Demo Mode: Profile details updated locally! No database changes made.')
+        setTimeout(() => setSuccess(''), 4000)
+      }, 300)
+      return
+    }
+
     try {
       const res = await api.put('/profile/me', form)
       setProfile(res.data)
@@ -157,6 +169,28 @@ function MemberProfileForm() {
     setUploading(true)
     setError('')
     setSuccess('')
+
+    if (isDemo) {
+      setTimeout(() => {
+        setUploading(false)
+        const newDoc = {
+          id: `demo-doc-${Date.now()}`,
+          documentType: docType,
+          originalName: file.name,
+          fileSize: file.size,
+          uploadedAt: new Date().toISOString(),
+        }
+        setProfile((prev) => ({
+          ...prev,
+          documents: [newDoc, ...(prev?.documents || [])],
+        }))
+        setSuccess('Demo Mode: Document added locally for demonstration!')
+        if (fileRef.current) fileRef.current.value = ''
+        setTimeout(() => setSuccess(''), 4000)
+      }, 400)
+      return
+    }
+
     const data = new FormData()
     data.append('file', file)
     data.append('documentType', docType)
@@ -179,6 +213,17 @@ function MemberProfileForm() {
 
   const handleDeleteDoc = async (documentId) => {
     if (!window.confirm('Remove this document?')) return
+
+    if (isDemo) {
+      setProfile((prev) => ({
+        ...prev,
+        documents: (prev?.documents || []).filter((d) => d.id !== documentId),
+      }))
+      setSuccess('Demo Mode: Document removed locally!')
+      setTimeout(() => setSuccess(''), 4000)
+      return
+    }
+
     try {
       const res = await api.delete(`/profile/documents/${documentId}`)
       setProfile(res.data)

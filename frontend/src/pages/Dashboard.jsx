@@ -12,7 +12,7 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import api from '../api/axios'
-import { handleAuthError } from '../utils/auth'
+import { handleAuthError, isDemoUser } from '../utils/auth'
 import InviteModal from '../components/InviteModal'
 import { useChat } from '../context/ChatContext'
 
@@ -137,6 +137,7 @@ export default function Dashboard() {
   const notifRef = useRef(null)
 
   const tenantName = localStorage.getItem('tenantName') || 'Your Company'
+  const isDemo = isDemoUser()
   const role = localStorage.getItem('role')
   const canInvite = role === 'ORG_ADMIN'
 
@@ -206,7 +207,20 @@ export default function Dashboard() {
       {/* Welcome banner */}
       <section className="dash-welcome">
         <div className="dash-welcome-text">
-          <p className="dash-welcome-greet">{getGreeting()} 👋</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+            <p className="dash-welcome-greet" style={{ margin: 0 }}>{getGreeting()} 👋</p>
+            {isDemo && (
+              <div className="demo-mode-container" title="You are exploring a read-only demo environment.">
+                <span className="demo-mode-badge-pill">
+                  <span className="demo-mode-dot">●</span>
+                  DEMO MODE · Sample Data
+                </span>
+                <span className="demo-mode-tooltip">
+                  ℹ️ You are exploring a read-only demo environment.
+                </span>
+              </div>
+            )}
+          </div>
           <h1 className="dash-welcome-title">{tenantName}</h1>
           <p className="dash-welcome-sub">
             Here&apos;s what&apos;s happening in your workspace today.
